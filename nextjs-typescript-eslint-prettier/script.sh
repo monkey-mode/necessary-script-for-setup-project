@@ -10,7 +10,7 @@ then
 fi
 
 # Create a new Next.js project with TypeScript
-npx create-next-app $PROJECT_NAME --use-yarn --example with-typescript
+npx create-next-app $PROJECT_NAME --use-yarn --typescript
 
 # Navigate to the project directory
 cd $PROJECT_NAME
@@ -20,22 +20,27 @@ cd $PROJECT_NAME
 npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-config-prettier eslint-plugin-prettier prettier
 
 # Create an .eslintrc.json file with the following contents:
-echo "module.exports = {
-  parser: '@typescript-eslint/parser',
-  extends: [
-    'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
-    'plugin:prettier/recommended',
+echo '{
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "plugin:@typescript-eslint/recommended",
+    "prettier/@typescript-eslint",
+    "plugin:prettier/recommended"
   ],
-  parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
-    },
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
   },
-  rules: {},
-};" > .eslintrc.js
+  "rules": {
+    // I suggest you add those two rules:
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
+  }
+}' > .eslintrc.json
+
 
 # Create a .prettierrc file with the following contents:
 echo '{
@@ -45,25 +50,6 @@ echo '{
   "useTabs": false
 }' > .prettierrc
 
-# Create a nodemon.json file with the specified configuration:
-echo '{
-    "restartable": "rs",
-    "ignore": [
-        ".git",
-        "node_modules/**/node_modules",
-        "dist"
-    ],
-    "verbose": true,
-    "execMap": {
-        "ts": "ts-node"
-    },
-    "runOnChangeOnly": false,
-    "watch": [
-        "src/**/*.ts",
-        "src/**/*.js"
-    ]
-}' > nodemon.json
-
 
 # Modify the package.json file to include the lint and format scripts
-sed -i '' 's/"scripts": {/"scripts": {\n    "lint": "eslint --ext .ts,.tsx --ignore-path .gitignore .",\n    "format": "prettier --write \\"src/**/*.{ts,tsx}\\"",/' package.json
+sed -i 's/"scripts": {/"scripts": {\n"format": "prettier --write src\/**\/*.{js,jsx,ts,tsx}", /' package.json
