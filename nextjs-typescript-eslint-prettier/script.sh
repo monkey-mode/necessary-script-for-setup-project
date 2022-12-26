@@ -15,62 +15,70 @@ npx create-next-app $PROJECT_NAME --use-npm
 # Navigate to the project directory
 cd $PROJECT_NAME
 
-# Install the necessary dependencies for TypeScript, ESLint, and Prettier
-npm install --save-dev typescript @types/react @types/node eslint eslint-plugin-react @typescript-eslint/parser @typescript-eslint/eslint-plugin prettier
+# Add TypeScript support
+npm install --save-dev typescript @types/react @types/node
 
-# Create a tsconfig.json file in the root of the project
+# Create a tsconfig.json file
+npx tsc --init
+
+# Add ESLint and Prettier
+npm install --save-dev eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin eslint-config-prettier eslint-plugin-prettier prettier
+
+# Create an .eslintrc.json file with the following contents:
 echo '{
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "jsx": "preserve",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "outDir": "./build",
-    "esModuleInterop": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
-}' > tsconfig.json
-
-# Create an .eslintrc.js file in the root of the project
-echo "module.exports = {
-  parser: '@typescript-eslint/parser',
-  parserOptions: {
-    ecmaVersion: 2020,
-    sourceType: 'module',
-    ecmaFeatures: {
-      jsx: true,
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "prettier"
+    ],
+  "plugins": ["prettier","@typescript-eslint"],
+  "parserOptions": {
+      "project": "./tsconfig.json"
     },
-  },
-  settings: {
-    react: {
-      version: 'detect',
+   "env": {
+      "node": true
     },
-  },
-  extends: [
-    'eslint:recommended',
-    'plugin:react/recommended',
-    'plugin:@typescript-eslint/recommended',
-    'prettier/@typescript-eslint',
-  ],
-  rules: {
-    'react/prop-types': 'off',
-    'react/react-in-jsx-scope': 'off',
-  },
-};" > .eslintrc.js
+  "rules": {
+    "@typescript-eslint/no-unused-vars": "warn",
+    "@typescript-eslint/no-explicit-any": "warn"
+  }
+}' > .eslintrc.json
 
-# Create a .prettierrc file in the root of the project
+# Create a .prettierrc file with the following contents:
 echo '{
   "semi": false,
   "singleQuote": true,
   "tabWidth": 2,
-  "trailingComma": "es5",
   "useTabs": false
 }' > .prettierrc
 
-# Update the scripts section of your package.json file to include the following scripts
-jq '.scripts |= .+ {"build": "next build", "start": "next start", "lint": "eslint \'**/*.{js,jsx,ts,tsx}\' --fix", "format": "prettier --write \'**/*.{js,jsx,ts,tsx}\'"}' package.json > tmp.json && mv tmp.json package.json
+# Create a nodemon.json file with the specified configuration:
+echo '{
+    "restartable": "rs",
+    "ignore": [
+        ".git",
+        "node_modules/**/node_modules",
+        "dist"
+    ],
+    "verbose": true,
+    "execMap": {
+        "ts": "ts-node"
+    },
+    "runOnChangeOnly": false,
+    "watch": [
+        "src/**/*.ts",
+        "src/**/*.js"
+    ]
+}' > nodemon.json
+
+# Add scripts to package.json to run ESLint and Prettier
+cat <<EOT >> package.json
+  "scripts": {
+    "build": "npx tsc",
+    "dev": "npm run lint && npm run build && nodemon",
+    "start": "node dist/index.js",
+    "lint": "eslint 'src/**/*.{js,ts}' --fix",
+    "format": "prettier --write 'src/**/*.{js,ts}'"
+  },
+EOT
