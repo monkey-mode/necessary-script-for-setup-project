@@ -15,18 +15,62 @@ npx create-next-app $PROJECT_NAME --use-npm
 # Navigate to the project directory
 cd $PROJECT_NAME
 
-# Install dependencies for TypeScript, ESLint, and Prettier
-npm install --save-dev typescript @types/react @types/node eslint eslint-config-prettier eslint-plugin-prettier prettier
+# Install the necessary dependencies for TypeScript, ESLint, and Prettier
+npm install --save-dev typescript @types/react @types/node eslint eslint-plugin-react @typescript-eslint/parser @typescript-eslint/eslint-plugin prettier
 
-# Create a TypeScript configuration file
-npx tsc --init
+# Create a tsconfig.json file in the root of the project
+echo '{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "jsx": "preserve",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "outDir": "./build",
+    "esModuleInterop": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}' > tsconfig.json
 
-# Create an ESLint configuration file
-npx eslint --init
+# Create an .eslintrc.js file in the root of the project
+echo "module.exports = {
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    ecmaVersion: 2020,
+    sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
+  },
+  settings: {
+    react: {
+      version: 'detect',
+    },
+  },
+  extends: [
+    'eslint:recommended',
+    'plugin:react/recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier/@typescript-eslint',
+  ],
+  rules: {
+    'react/prop-types': 'off',
+    'react/react-in-jsx-scope': 'off',
+  },
+};" > .eslintrc.js
 
-# During the ESLint configuration process, select "To check syntax, find problems, and enforce code style" as the reason for using ESLint, and select "TypeScript" as the language.
-# Select "JavaScript modules (import/export)" as the type of modules you are using, and select "React" as the framework.
-# Select "Yes" when asked if you want to use a style guide, and choose "Prettier" as the style guide.
-# Select "Node" as the environment, and choose "jsx" as the file extensions to lint.
-# Finally, select "Install and configure dependencies" when prompted to install the recommended dependencies.
+# Create a .prettierrc file in the root of the project
+echo '{
+  "semi": false,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "useTabs": false
+}' > .prettierrc
 
+# Update the scripts section of your package.json file to include the following scripts
+jq '.scripts |= .+ {"build": "next build", "start": "next start", "lint": "eslint \'**/*.{js,jsx,ts,tsx}\' --fix", "format": "prettier --write \'**/*.{js,jsx,ts,tsx}\'"}' package.json > tmp.json && mv tmp.json package.json
