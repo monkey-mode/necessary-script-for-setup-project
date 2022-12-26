@@ -53,3 +53,5 @@ echo '{
 
 # Modify the package.json file to include the lint and format scripts
 sed -i 's/"scripts": {/"scripts": {\n"format": "prettier --write src\/**\/*.{js,jsx,ts,tsx}", /' package.json
+
+rm -rf .git
